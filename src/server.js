@@ -1,9 +1,10 @@
 const express = require('express');
 require("express-async-errors")
-
+const database = require("./database/sqlite")
 
 
 const routes = require("./routes")
+database()
 const app = express();
 app.use(express.json())
 
