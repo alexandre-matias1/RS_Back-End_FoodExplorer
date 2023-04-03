@@ -2,6 +2,7 @@ const express = require('express');
 require("express-async-errors")
 
 
+const AppError = require("./utils/AppError")
 const routes = require("./routes")
 const app = express();
 app.use(express.json())
