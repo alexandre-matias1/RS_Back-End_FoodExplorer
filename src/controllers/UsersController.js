@@ -5,14 +5,14 @@ class usersControllers{
     async create(request, response){
         const{ name, email, password, isAdmin } = request.body;
         
-        const checkUserExist = await knex("users").select("email").where('email','=',email);
-            if(checkUserExist != 0){
+        const [checkUserExist] = await knex("users").select("email").where('email','=',email);
+            if(checkUserExist){
             throw new AppError("Este email já está em uso");
         }
 
         const hashedPassword = await hash(password, 8);
 
-        const createUser = await knex("users").insert({
+        await knex("users").insert({
             name,
             email,
             password:hashedPassword,
@@ -21,7 +21,47 @@ class usersControllers{
 
         return response.status(201).json();
     }
+    async update(request, response){
+        const { name, email, oldPassword, newPassword } = request.body
+        const { id } = request.params 
 
+        const [user] = await knex("users").select("*").where({id})
+        if(!user){
+            throw new AppError("Usuario nao encontrado")
+        }
+
+        const [userWithUpdatedEmail] = await knex("users").select("*").where({email})
+        
+
+        if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id){
+            throw new AppError("Este e-mail já esta em uso")
+        }
+        
+        user.name = name ?? user.name;
+        user.email = email ?? user.email;
+
+        if(!oldPassword && newPassword){
+            throw new AppError("Você precisa informar a senha antiga")
+         }
+
+        if(newPassword && oldPassword){
+            const checkPassword = await compare(oldPassword, user.password);
+
+            if(!checkPassword){
+                throw new AppError("Senha antiga incorreta")
+            }
+        }
+
+        user.password = await hash(newPassword, 8)
+        
+        await knex("users").where({id}).update({
+            name:user.name,
+            email:user.email,
+            password:user.password
+        })
+
+        response.json({name, email, oldPassword, newPassword })
+    }
 }
 
 module.exports = usersControllers;
