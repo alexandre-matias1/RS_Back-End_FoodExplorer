@@ -60,7 +60,7 @@ class usersControllers{
             password:user.password
         })
 
-        response.json({name, email, oldPassword, newPassword })
+        return response.status(201).json();
     }
 }
 

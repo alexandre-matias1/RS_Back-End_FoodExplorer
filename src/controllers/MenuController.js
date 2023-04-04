@@ -3,10 +3,25 @@ const AppError = require("../utils/AppError");
 
 class menuController{
     async create(request, response){
-        const { name, price, description, category } = request.body
+        const { name, preco, description, category, ingredients } = request.body
         console.log("a")
 
-        response.json({ name, price, description, category } )
+        const [menu_id] = await knex("menu").insert({
+            name,
+            preco,
+            description,
+            category
+        })
+
+        const ingredientsInsert = ingredients.map(ingredient =>{
+            return {
+                menu_id,
+                name:ingredient
+            }
+        })
+        await knex("ingredients").insert(ingredientsInsert)
+
+        return response.status(201).json();
     }
 }
 
