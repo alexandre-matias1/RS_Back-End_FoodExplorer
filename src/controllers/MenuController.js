@@ -106,7 +106,6 @@ class menuController{
             .innerJoin("menu", "menu.id", "ingredients.menu_id")
             .orderBy("menu.name")
         
-            console.log(menu)
         }else{
             menu = await knex("menu")
             .whereLike("name", `%${name}%`)
@@ -124,8 +123,6 @@ class menuController{
         
         
         })
-
-
         return response.json(menuWithIngredients)
     }
 }
