@@ -4,7 +4,13 @@ const AppError = require("../utils/AppError");
 class menuController{
     async create(request, response){
         const { name, preco, description, category, ingredients } = request.body
+        const user_id = request.user.id
+        const [{isAdmin}] = await knex("users").where({id:user_id}).select("isAdmin")
 
+
+        if(isAdmin !== 1){
+            throw new AppError("Apenas admnistradores podem criar pedidos")
+        }
         const dishExists= await knex("menu").where({name}).first()
 
         if(dishExists){
@@ -33,7 +39,13 @@ class menuController{
 
     async update(request, response){
             const { name, preco, description, category, ingredients } = request.body;
-            const { id } = request.params         
+            const user_id = request.user.id;
+            const [{isAdmin}] = await knex("users").where({id:user_id}).select("isAdmin");
+
+
+            if(isAdmin !== 1){
+                throw new AppError("Apenas admnistradores podem alterar pedidos")
+            }
 
             const dishExists= await knex("menu").where({name}).first()
 
@@ -61,12 +73,19 @@ class menuController{
             await knex("ingredients").insert(updateIngredients)
 
 
-            response.json({name, preco, description, category, ingredients})
+            return response.json({name, preco, description, category, ingredients})
 
     }
 
     async delete(request, response){
-        const { id } = request.params;
+        const user_id = request.user.id;
+        const [{isAdmin}] = await knex("users").where({id:user_id}).select("isAdmin");
+
+
+        if(isAdmin !== 1){
+            throw new AppError("Apenas admnistradores podem deletar pedidos")
+        }
+
 
 
         await knex("menu").where({ id }).delete();
