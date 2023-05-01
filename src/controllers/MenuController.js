@@ -11,6 +11,7 @@ class menuController{
         if(isAdmin !== 1){
             throw new AppError("Apenas admnistradores podem criar pedidos")
         }
+
         const dishExists= await knex("menu").where({name}).first()
 
         if(dishExists){
@@ -32,6 +33,7 @@ class menuController{
             }
         })
 
+
         await knex("ingredients").insert(ingredientsInsert)
 
         return response.status(201).json();
@@ -39,6 +41,7 @@ class menuController{
 
     async update(request, response){
             const { name, preco, description, category, ingredients } = request.body;
+            const { id } = request.params
             const user_id = request.user.id;
             const [{isAdmin}] = await knex("users").where({id:user_id}).select("isAdmin");
 
